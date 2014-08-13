@@ -119,10 +119,13 @@ void *processFrame (void *arg) {
             std_msgs::Float64MultiArray cornersMsg = makeCornersMsg(imagePts);
             cornersPub.publish(cornersMsg);
             simplePose = estimatePose(imagePts);
+
+            std::cout << simplePose.t() << std::endl;
+
             std_msgs::Float64MultiArray simplePoseMsg = \
                 makeSimplePoseMsg(simplePose);
             simplePosePub.publish(simplePoseMsg);
-            ROS_INFO("Tick.");
+//            ROS_INFO("Tick.");
         } else {
             // Don't publish anything this tick.
             ROS_INFO("Could not detect all corners!");

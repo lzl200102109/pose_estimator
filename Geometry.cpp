@@ -19,6 +19,7 @@
 */
 
 #include "Geometry.h"
+#include "math.h"
 
 #include <cstdio>
 using namespace std; // DEBUG
@@ -120,7 +121,7 @@ Mat_<double> estimatePose(Mat_<double> const imagePts)
     // See http://planning.cs.uiuc.edu/node103.html
     simplePose(3) = atan2(rotMatrix(1, 0), rotMatrix(0, 0));
     // cout << "simplePose: " << simplePose << endl;
-    return simplePose;
+    return CoordTransform(M_PI/2, 0, M_PI)*simplePose;
 }
 
 Mat_<double> getWorldPts()
@@ -320,4 +321,30 @@ Mat_<double> unCalibrateImagePoints(Mat_<double> const calibratedImagePts)
             calibratedImagePts(i, 1) * cameraMatrix(1, 1) + cameraMatrix(1, 2);
     }
     return imagePts;
+}
+
+Mat_<double> CoordTransform ( double yawAngle, double pitchAngle, double rollAngle ) {
+
+	Mat_<double> Axes   = Mat::eye(3,3,CV_32FC1);
+	Mat_<double> yawAxis = Axes.col(2);
+	Mat_<double> yawMatrix   = rotAxisAngleToRotMatrix(yawAxis, yawAngle);
+
+	Axes = yawMatrix * Axes;
+	Mat_<double> pitchAxis = Axes.col(1);
+	Mat_<double> pitchMatrix   = rotAxisAngleToRotMatrix(pitchAxis, pitchAngle);
+
+	Axes = pitchMatrix * Axes;
+	Mat_<double> rollAxis = Axes.col(0);
+	Mat_<double> rollMatrix   = rotAxisAngleToRotMatrix(rollAxis, rollAngle);
+
+	Mat_<double>rotMatrix = rollMatrix * pitchMatrix * yawMatrix;
+
+	Mat_<double>transformMatrix = -Mat::eye(4,4,CV_32FC1);
+	Mat_<double>temp = transformMatrix (cv::Rect(0,0,3,3));
+	rotMatrix.copyTo(temp);
+
+//	std::cout << "transformMatrix = " << std::endl;
+//	std::cout << transformMatrix << std::endl;
+
+	return transformMatrix;
 }

@@ -160,3 +160,5 @@ Mat_<double> calibrateImagePoints(Mat_<double> const imagePts);
  * imagePts (Nx2) = uncalibrated image points
  */
 Mat_<double> unCalibrateImagePoints(Mat_<double> const calibratedImagePts);
+
+Mat_<double> CoordTransform (double yawAngle, double pitchAngle, double rollAngle);
